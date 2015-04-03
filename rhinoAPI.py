@@ -1,5 +1,5 @@
 import rhinoscriptsyntax as rs
-
+import random
 
 def main():
     #objectIn = rs.GetObject("select a point",1)
@@ -15,21 +15,30 @@ def main():
     print "center of curve at " +str(center.X) +str(center.Y)+str(center.Z) 
     #rs.AddPoint(center)
     
-    newCurves = rs.ExplodeCurves(curveIn)
-    
+    recursiveCurveSplitter(curveIn,0,3)
+
+
+def recursiveCurveSplitter(curve, gen, maxGen):
+    curveObject = rs.coercecurve(curve)
+    boundingBox = curveObject.GetBoundingBox(True)
+    center = boundingBox.Center
+    newCurves = rs.ExplodeCurves(curve)
     for curve in newCurves:
         pts = []
         pts.append(rs.CurveStartPoint(curve))
         pts.append(rs.CurveEndPoint(curve))
         pts.append(center)
         pts.append(rs.CurveStartPoint(curve))
-        
         triangleCurve = rs.AddCurve(pts,1)
-        roundCurve = rs.AddCurve(pts,3)
         
-        surface = rs.AddPlanarSrf(triangleCurve)
-        newSurfs = trimSurfaceWithCurve(surface,roundCurve)
-        rs.DeleteObject(surface)
+        if random.random()>.5 or gen > maxGen:
+            roundCurve = rs.AddCurve(pts,3)
+            surface = rs.AddPlanarSrf(triangleCurve)
+            newSurfs = trimSurfaceWithCurve(surface,roundCurve)
+            rs.DeleteObject(surface)
+        else:
+            recursiveCurveSplitter(triangleCurve, gen+1, maxGen)
+            
 
 def trimSurfaceWithCurve(surface, curve):
     centroid = rs.SurfaceAreaCentroid(surface)
