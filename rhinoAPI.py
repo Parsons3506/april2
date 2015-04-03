@@ -15,7 +15,13 @@ def main():
     print "center of curve at " +str(center.X) +str(center.Y)+str(center.Z) 
     #rs.AddPoint(center)
     
-    recursiveCurveSplitter(curveIn,0,3)
+    newCurves = []
+    
+    for i in range(0,3):
+        triangles = recursiveCurveSplitter(curveIn,i,2)
+        if len(triangles)>0:
+            for triangle in triangles:
+                newCurves.append(triangle)
 
 
 def recursiveCurveSplitter(curve, gen, maxGen):
@@ -23,6 +29,7 @@ def recursiveCurveSplitter(curve, gen, maxGen):
     boundingBox = curveObject.GetBoundingBox(True)
     center = boundingBox.Center
     newCurves = rs.ExplodeCurves(curve)
+    returnCrvs = []
     for curve in newCurves:
         pts = []
         pts.append(rs.CurveStartPoint(curve))
@@ -30,15 +37,15 @@ def recursiveCurveSplitter(curve, gen, maxGen):
         pts.append(center)
         pts.append(rs.CurveStartPoint(curve))
         triangleCurve = rs.AddCurve(pts,1)
-        
+        tempNum = random.random()
         if random.random()>.5 or gen > maxGen:
             roundCurve = rs.AddCurve(pts,3)
             surface = rs.AddPlanarSrf(triangleCurve)
             newSurfs = trimSurfaceWithCurve(surface,roundCurve)
             rs.DeleteObject(surface)
         else:
-            recursiveCurveSplitter(triangleCurve, gen+1, maxGen)
-            
+            returnCrvs.append(triangleCurve)
+    return returnCrvs
 
 def trimSurfaceWithCurve(surface, curve):
     centroid = rs.SurfaceAreaCentroid(surface)
