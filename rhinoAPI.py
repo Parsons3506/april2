@@ -16,12 +16,18 @@ def main():
     #rs.AddPoint(center)
     
     newCurves = []
-    
-    for i in range(0,3):
-        triangles = recursiveCurveSplitter(curveIn,i,2)
+    startCurves= recursiveCurveSplitter(curveIn,0,3)
+    for curve in startCurves:
+        triangles = recursiveCurveSplitter(curveIn,i,3)
         if len(triangles)>0:
             for triangle in triangles:
                 newCurves.append(triangle)
+        else:
+            for curve in newCurves:
+                triangles = recursiveCurveSplitter(curveIn,i,3)
+            if len(triangles)>0:
+                for triangle in triangles:
+                    newCurves.append(triangle)
 
 
 def recursiveCurveSplitter(curve, gen, maxGen):
